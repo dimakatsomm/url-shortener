@@ -65,10 +65,10 @@ app.get('/', (req, res) => {
 
 app.post('/api/shorturl', (req, res) => {
   isValidURL(req.body.url).then((valid) => {
-    if (!valid) res.status(500).json({ error: 'invalid url' });
+    if (!valid) res.json({ error: 'invalid url' });
     generateRandomString().then((shortUrl) => {
       Urls.create({fullUrl: req.body.url, shortUrl: shortUrl}, (err, url) => {
-        if (err) res.status(500).send(err);
+        if (err) res.send(err);
         res.status(200).json({original_url : url.fullUrl, short_url : url.shortUrl});
       })
     })
@@ -77,7 +77,7 @@ app.post('/api/shorturl', (req, res) => {
 
 app.get('/api/shorturl/:shorturl', (req, res) => {
   Urls.findOne({shortUrl: req.params.shorturl}, (err, url) => {
-    if (err) res.status(500).json({ error: 'invalid url' });
+    if (err) res.json({ error: 'invalid url' });
     res.redirect(url.fullUrl);
   })
 });

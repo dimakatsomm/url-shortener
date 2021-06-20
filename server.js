@@ -30,6 +30,7 @@ const Urls = mongoose.model('Urls', urlSchema);
 const getRandomValue = (minValue, maxValue) => {
   return Math.round(Math.random() * (maxValue - minValue) + minValue);
 }
+
 const generateRandomString = async (length = getRandomValue(8, 12)) => {
   const characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let charactersLength = characters.length;
@@ -42,17 +43,30 @@ const generateRandomString = async (length = getRandomValue(8, 12)) => {
   return randomString;
 }
 
+const isValidURL = async (urlString) => {
+  var pattern = new RegExp('^(http{s}:\\/\\/)?'+ // protocol
+  '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|'+ // domain name
+  '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+  '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+  '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+  '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+  return pattern.test(urlString);
+}
+
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 })
 
 app.post('/api/shorturl', (req, res) => {
-  generateRandomString().then((shortUrl) => {
-    Urls.create({fullUrl: req.body.url, shortUrl: shortUrl}, (err, url) => {
-      if (err) res.status(500).send(err);
-      res.status(200).json({original_url : url.fullUrl, short_url : url.shortUrl});
+  isValidURL(req.body.url).then((valid) => {
+    if (!valid) res.status(500).json({ error: 'invalid url' });
+    generateRandomString().then((shortUrl) => {
+      Urls.create({fullUrl: req.body.url, shortUrl: shortUrl}, (err, url) => {
+        if (err) res.status(500).send(err);
+        res.status(200).json({original_url : url.fullUrl, short_url : url.shortUrl});
+      })
     })
-  });
+  })
 });
 
 app.get('/api/shorturl/:shorturl', (req, res) => {

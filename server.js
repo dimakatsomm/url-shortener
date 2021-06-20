@@ -55,8 +55,8 @@ app.post('/api/shorturl', (req, res) => {
   });
 });
 
-app.get('/api/:shortId', (req, res) => {
-  Urls.findOne({shortUrl: req.params.shortId}, (err, url) => {
+app.get('/api/shorturl/:shorturl', (req, res) => {
+  Urls.findOne({shortUrl: req.params.shorturl}, (err, url) => {
     if (err) res.status(500).json({ error: 'invalid url' });
     res.redirect(url.fullUrl);
   })

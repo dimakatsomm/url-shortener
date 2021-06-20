@@ -12,6 +12,7 @@ app.use(helmet());
 app.use(bodyParser.urlencoded({"extended": false}));
 app.use(bodyParser.json());
 app.use(cors({optionsSuccessStatus: 200}));  // some legacy browsers choke on 204
+app.use('/public', express.static(__dirname + '/public'))
 
 mongoose.connect(`${process.env.MONGO_URI}`,{
   useNewUrlParser: true, 
@@ -27,30 +28,35 @@ const urlSchema = new Schema({
 const Urls = mongoose.model('Urls', urlSchema);
 
 const getRandomValue = (minValue, maxValue) => {
-  return Math.random() * (maxValue - minValue) + minValue;
+  return Math.round(Math.random() * (maxValue - minValue) + minValue);
 }
-const generateRandomString = (length = getRandomValue(8, 12)) => {
+const generateRandomString = async (length = getRandomValue(8, 12)) => {
   const characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let charactersLength = characters.length;
   let randomString = '';
 
   for (let i = 0; i < length; i++) {
-    randomString += characters[getRandomValue(0, charactersLength - 1)];
+    randomString += characters.substr(getRandomValue(0, charactersLength - 1), 1);
   }
 
   return randomString;
 }
 
-app.post('/short', (req, res) => {
-  let shortUrl = generateRandomString();
-  Urls.create({fullUrl: req.body.fullUrl, shortUrl: shortUrl}, (err, url) => {
-    if (err) res.status(500).send(err);
-    res.sendStatus(200);
-  })
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/views/index.html')
+})
+
+app.post('/api/shorturl', (req, res) => {
+  generateRandomString().then((shortUrl) => {
+    Urls.create({fullUrl: req.body.url, shortUrl: shortUrl}, (err, url) => {
+      if (err) res.status(500).send(err);
+      res.sendStatus(200);
+    })
+  });
 });
 
-app.get('/:shortUrl', (req, res) => {
-  Urls.findOne({shortUrl: req.params.shortUrl}, (err, url) => {
+app.get('/api/:shortId', (req, res) => {
+  Urls.findOne({shortUrl: req.params.shortId}, (err, url) => {
     if (err) res.status(500).send(err);
     res.redirect(url.fullUrl);
   })

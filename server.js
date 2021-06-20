@@ -50,14 +50,14 @@ app.post('/api/shorturl', (req, res) => {
   generateRandomString().then((shortUrl) => {
     Urls.create({fullUrl: req.body.url, shortUrl: shortUrl}, (err, url) => {
       if (err) res.status(500).send(err);
-      res.sendStatus(200);
+      res.sendStatus(200).json({original_url : url.fullUrl, short_url : url.shortUrl});
     })
   });
 });
 
 app.get('/api/:shortId', (req, res) => {
   Urls.findOne({shortUrl: req.params.shortId}, (err, url) => {
-    if (err) res.status(500).send(err);
+    if (err) res.status(500).json({ error: 'invalid url' });
     res.redirect(url.fullUrl);
   })
 });

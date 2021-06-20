@@ -50,7 +50,7 @@ app.post('/api/shorturl', (req, res) => {
   generateRandomString().then((shortUrl) => {
     Urls.create({fullUrl: req.body.url, shortUrl: shortUrl}, (err, url) => {
       if (err) res.status(500).send(err);
-      res.sendStatus(200).json({original_url : url.fullUrl, short_url : url.shortUrl});
+      res.status(200).json({original_url : url.fullUrl, short_url : url.shortUrl});
     })
   });
 });

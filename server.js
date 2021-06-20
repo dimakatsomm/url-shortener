@@ -69,7 +69,7 @@ app.post('/api/shorturl', (req, res) => {
     generateRandomString().then((shortUrl) => {
       Urls.create({fullUrl: req.body.url, shortUrl: shortUrl}, (err, url) => {
         if (err) res.send(err);
-        res.status(200).json({original_url : url.fullUrl, short_url : url.shortUrl});
+        res.json({original_url : url.fullUrl, short_url : url.shortUrl});
       })
     })
   })

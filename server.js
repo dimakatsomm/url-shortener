@@ -44,15 +44,19 @@ const generateRandomString = async (length = getRandomValue(8, 12)) => {
 }
 
 const isValidURL = async (urlString) => {
+  /*
   let url = null
 
   try {
     url = new URL(urlString)
   } catch (err) {
-    if (err instanceof TypeError) url = 'invalid url'
+    return false;
   }
 
-  return url === 'invalid url' ? false : true;
+  return true;
+
+  */
+  return /^((http|https):\/\/)?([w|W]{3}\.)+[a-zA-Z0-9\-\.]{3,}\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$/.test(urlString)
 }
 
 app.get('/', (req, res) => {
